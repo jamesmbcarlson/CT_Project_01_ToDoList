@@ -247,17 +247,17 @@ while True:
     else:
         print()
 
-        if menu_input.startswith("1") or menu_input.startswith("add"):
+        if menu_input == "1" or menu_input.startswith("add"):
             tasks_add()
-        elif menu_input.startswith("2") or menu_input.startswith("view"):
+        elif menu_input == "2" or menu_input.startswith("view"):
             tasks_view()
-        elif menu_input.startswith("3") or menu_input.startswith("mark"):
+        elif menu_input == "3" or menu_input.startswith("mark"):
             tasks_complete()
-        elif menu_input.startswith("4") or menu_input.startswith("prioritize"):
+        elif menu_input == "4" or menu_input.startswith("prioritize"):
             tasks_prioritize()
-        elif menu_input.startswith("5") or menu_input.startswith("delete"):
+        elif menu_input == "5" or menu_input.startswith("delete"):
             tasks_delete()
-        elif menu_input.startswith("6") or menu_input.startswith("quit"):
+        elif menu_input == "6" or menu_input.startswith("quit"):
             print("Thank you for using the To-Do List App!")
             break
         else:
