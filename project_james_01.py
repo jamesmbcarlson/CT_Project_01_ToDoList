@@ -2,6 +2,10 @@
 # Coding Temple - SE FT-144
 # Module 2: Mini-project | To-Do list Application
 
+# string constants
+COMPLETE = "COMPLETE: "
+PRIORITY = "PRIORITY: "
+
 # colors for color coordination
 COLOR_RED = "\033[91m"
 COLOR_YELLOW = "\033[93m"
@@ -16,9 +20,24 @@ def tasks_add():
     Prompt user for new task to add to To-Do List.
     """
 
+    # add new tasks to list before completed tasks
+    completed_index = -1
+    for i in range(len(task_list)):
+        if str(task_list[i]).startswith(COMPLETE):
+            completed_index = i
+            break
+
+    # get new task from user
     new_task = input("What task shall we add? ")
-    task_list.append(new_task)
-    print(f"\"{new_task}\" added to your to-do list at position {len(task_list)}.\n")
+
+    # add new item before completed tasks if they are on the list
+    if completed_index != -1:
+        task_list.insert(completed_index, new_task)
+        print(f"\"{new_task}\" added to your to-do list at position {completed_index + 1}.\n")
+    # add new item at end of list if no completed tasks
+    else:
+        task_list.append(new_task)
+        print(f"\"{new_task}\" added to your to-do list at position {len(task_list)}.\n")
 
 def tasks_view():
     """
@@ -36,10 +55,10 @@ def tasks_view():
 
             # color coordinate urgency of tasks 
             # GREEN = COMPLETE
-            if str(task_list[i]).startswith("COMPLETE: "):
+            if str(task_list[i]).startswith(COMPLETE):
                 text_color = COLOR_GREEN
             # RED = PRIORITY
-            elif str(task_list[i]).startswith("PRIORITY: "):
+            elif str(task_list[i]).startswith(PRIORITY):
                 text_color = COLOR_RED
             # YELLOW = NORMAL
             else:
@@ -71,23 +90,21 @@ def find_input(action):
     while True:
         task_to_find = input(f"Which item would you like to {action}? ")
 
-        # if task_to_find.startswith("COMPLETE: ") or task_to_find.startswith("PRIORITY: "):
-        #     task_to_find = task_to_find[10:]
-
-        # handle string match
-        if task_to_find in task_list:
-            return task_to_find
-        
         # handle numerical selection
-        elif task_to_find.isdigit() and int(task_to_find) > 0 and int(task_to_find) <= len(task_list):
+        if task_to_find.isdigit() and int(task_to_find) > 0 and int(task_to_find) <= len(task_list):
             return task_list[int(task_to_find) - 1]
         
         # exit while loop without making selection
         elif task_to_find.casefold() == "cancel":
             return None
-        
-        # handle input not matching item on list
+
         else:
+            # handle string match
+            for task in task_list:
+                if task_to_find in task:
+                    return task
+                
+            # handle input not matching item on list
             print(f"Item \"{task_to_find}\" could not be found. Try again or enter \"cancel\" to return to the main menu.\n")
 
 def get_binary_input(prompt):
@@ -133,22 +150,23 @@ def tasks_complete():
             return
         
         # handle task already marked as complete
-        elif str(task_to_mark).startswith("COMPLETE: "):
+        elif str(task_to_mark).startswith(COMPLETE):
             print(f"\"{task_to_mark[10:]}\" has already been marked as complete!")
             if get_binary_input(f"Would you like to unmark \"{task_to_mark[10:]}\" as complete? (yes/no) "):
-                task_list[task_list.index(task_to_mark)] = task_to_mark.replace("COMPLETE: ", "")
+                task_list[task_list.index(task_to_mark)] = task_to_mark.replace(COMPLETE, "")
+                print(f"{task_to_mark[10:]} is no longer set as complete.\n")
 
         # handle priority task changed to complete
-        elif str(task_to_mark).startswith("PRIORITY: "):
+        elif str(task_to_mark).startswith(PRIORITY):
             task_mark_slice = task_to_mark[10:]
             task_list.pop(task_list.index(task_to_mark))
-            task_list.append("COMPLETE: " + task_mark_slice)
-            print(f"\"{task_to_mark}\" has been marked as {COLOR_GREEN}COMPLETE{COLOR_RESET}!\n")
+            task_list.append(COMPLETE + task_mark_slice)
+            print(f"\"{task_to_mark[10:]}\" has been marked as {COLOR_GREEN}COMPLETE{COLOR_RESET}! Nice job!\n")
 
         # modify task to show as complete and move task to bottom of list
         else:
-            task_list.append("COMPLETE: " + task_list.pop(task_list.index(task_to_mark)))
-            print(f"\"{task_to_mark}\" has been marked as {COLOR_GREEN}COMPLETE{COLOR_RESET}!\n")
+            task_list.append(COMPLETE + task_list.pop(task_list.index(task_to_mark)))
+            print(f"\"{task_to_mark}\" has been marked as {COLOR_GREEN}COMPLETE{COLOR_RESET}! Nice job!\n")
 
 def tasks_prioritize():
     """
@@ -169,24 +187,24 @@ def tasks_prioritize():
             return
         
         # handle task already marked as priority
-        elif str(task_to_mark).startswith("PRIORITY: "):
+        elif str(task_to_mark).startswith(PRIORITY):
             print(f"\"{task_to_mark[10:]}\" has already been marked as a priority!")
             if get_binary_input(f"Would you like to unmark \"{task_to_mark[10:]}\" as a priority? (yes/no) "):
-                task_list[task_list.index(task_to_mark)] = task_to_mark.replace("PRIORITY: ", "")
+                task_list[task_list.index(task_to_mark)] = task_to_mark.replace(PRIORITY, "")
+                print(f"{task_to_mark[10:]} is no longer set as a priority.\n")
 
         # handle completed task changed to priority
-        elif str(task_to_mark).startswith("COMPLETED: "):
+        elif str(task_to_mark).startswith(COMPLETE):
             task_mark_slice = task_to_mark[10:]
             task_list.pop(task_list.index(task_to_mark))
-            task_list.append("PRIORITY: " + task_mark_slice)
-            print(f"\"{task_to_mark}\" has been marked as a {COLOR_RED}PRIORITY{COLOR_RESET}!\n")
+            task_list.insert(0, PRIORITY + task_mark_slice)
+            print(f"\"{task_to_mark[10:]}\" has been marked as a {COLOR_RED}PRIORITY{COLOR_RESET}!\n")
 
         # modify task to show as a priority and move task to the top of list
         else:
-            task_to_mark = "PRIORITY: " + task_list.pop(task_list.index(task_to_mark))
+            task_to_mark = PRIORITY + task_list.pop(task_list.index(task_to_mark))
             task_list.insert(0, task_to_mark)
             print(f"\"{task_to_mark[10:]}\" has been marked as a {COLOR_RED}PRIORITY{COLOR_RESET} and has been moved to the top of your list!\n")
-
 
 def tasks_delete():
     """
@@ -222,21 +240,27 @@ while True:
     print("6. Quit")
 
     # call application function based on user input
-    menu_input = input("Make a selection: ").casefold()
-    print()
-
-    if menu_input.startswith("1") or menu_input.startswith("add"):
-        tasks_add()
-    elif menu_input.startswith("2") or menu_input.startswith("view"):
-        tasks_view()
-    elif menu_input.startswith("3") or menu_input.startswith("mark"):
-        tasks_complete()
-    elif menu_input.startswith("4") or menu_input.startswith("prioritize"):
-        tasks_prioritize()
-    elif menu_input.startswith("5") or menu_input.startswith("delete"):
-        tasks_delete()
-    elif menu_input.startswith("6") or menu_input.startswith("quit"):
-        print("Thank you for using the To-Do List App!")
-        break
+    try:
+        menu_input = input("Make a selection: ").casefold()
+    except Exception as e:
+        print("Invalid input:", e)
     else:
-        print("Invalid input. Please try another selection.\n")
+        print()
+
+        if menu_input.startswith("1") or menu_input.startswith("add"):
+            tasks_add()
+        elif menu_input.startswith("2") or menu_input.startswith("view"):
+            tasks_view()
+        elif menu_input.startswith("3") or menu_input.startswith("mark"):
+            tasks_complete()
+        elif menu_input.startswith("4") or menu_input.startswith("prioritize"):
+            tasks_prioritize()
+        elif menu_input.startswith("5") or menu_input.startswith("delete"):
+            tasks_delete()
+        elif menu_input.startswith("6") or menu_input.startswith("quit"):
+            print("Thank you for using the To-Do List App!")
+            break
+        else:
+            print("Invalid input. Please try another selection.\n")
+    finally:
+        print("---\n")
